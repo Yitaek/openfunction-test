@@ -1,6 +1,6 @@
 const chromium = require('chrome-aws-lambda');
 
-exports.run = async (event, context, callback) => {
+exports.run = async (req, res) => {
   let result = null;
   let browser = null;
 
@@ -15,16 +15,20 @@ exports.run = async (event, context, callback) => {
 
     let page = await browser.newPage();
 
-    await page.goto(event.url || 'https://example.com');
+    console.log("req is", req)
+
+    await page.goto(req.url || 'https://example.com');
 
     result = await page.title();
+    console.log(result)
+
   } catch (error) {
-    return callback(error);
+    return res(error);
   } finally {
     if (browser !== null) {
       await browser.close();
     }
   }
 
-  return callback(null, result);
+  return res(result);
 };
