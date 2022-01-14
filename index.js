@@ -1,23 +1,30 @@
-const puppeteer = require("puppeteer");
+const chromium = require('chrome-aws-lambda');
 
-// we're using async/await - so we need an async function, that we can run
-module.exports.run = async () => {
-  // open the browser and prepare a page
-  const browser = await puppeteer.launch()
-  const page = await browser.newPage()
+exports.run = async (event, context, callback) => {
+  let result = null;
+  let browser = null;
 
-  // set the size of the viewport, so our screenshot will have the desired size
-  await page.setViewport({
-      width: 640,
-      height: 400
-  })
+  try {
+    browser = await chromium.puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
+    });
 
-  await page.goto('https://google.com/')
-  await page.screenshot({
-      path: 'google.png',
-      fullPage: true
-  })
+    let page = await browser.newPage();
 
-  // close the browser 
-  await browser.close();
+    await page.goto(event.url || 'https://example.com');
+
+    result = await page.title();
+  } catch (error) {
+    return callback(error);
+  } finally {
+    if (browser !== null) {
+      await browser.close();
+    }
+  }
+
+  return callback(null, result);
 };
