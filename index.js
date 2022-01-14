@@ -1,6 +1,6 @@
 const chromium = require('chrome-aws-lambda');
 
-module.exports.run = async (event) => {
+exports.run = async (event) => {
   let result = null;
   let browser = null;
 
